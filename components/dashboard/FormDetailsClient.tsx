@@ -5,17 +5,23 @@ import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
 import { Label } from '@/components/ui/Label'
-import { ArrowLeft, Check, Code, Copy, Eye, FileText, Inbox, Monitor, Trash2, X } from 'lucide-react'
+import { ArrowLeft, Check, Code, Copy, Eye, FileText, Inbox, Monitor, Settings, Trash2, X } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import { deleteSubmission } from '@/app/actions' // We'll need to add this action later if it doesn't exist, or just simulate for UI now.
+import { deleteSubmission, updateForm } from '@/app/actions'
+import { useActionState } from 'react'
 
 interface FormDetailsClientProps {
     form: any
     submissions: any[]
 }
 
-type Tab = 'submissions' | 'setup'
+type Tab = 'submissions' | 'setup' | 'settings'
+
+const initialState = {
+    error: '',
+    success: '',
+}
 
 export function FormDetailsClient({ form, submissions: initialSubmissions }: FormDetailsClientProps) {
     const [activeTab, setActiveTab] = useState<Tab>('submissions')
@@ -23,7 +29,19 @@ export function FormDetailsClient({ form, submissions: initialSubmissions }: For
     const [selectedSubmission, setSelectedSubmission] = useState<any | null>(null)
     const [copiedStates, setCopiedStates] = useState<Record<string, boolean>>({})
 
+    // Action state for settings form
+    const [state, updateAction, isUpdating] = useActionState(updateForm, initialState)
+
     const endpointUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/submit`
+
+    const getBrowserName = (userAgent: string) => {
+        if (!userAgent) return 'Unknown'
+        if (userAgent.includes('Edg/')) return 'Edge'
+        if (userAgent.includes('Chrome/')) return 'Chrome'
+        if (userAgent.includes('Firefox/')) return 'Firefox'
+        if (userAgent.includes('Safari/')) return 'Safari'
+        return 'Web View'
+    }
 
     const copyToClipboard = (text: string, key: string) => {
         navigator.clipboard.writeText(text)
@@ -38,8 +56,8 @@ export function FormDetailsClient({ form, submissions: initialSubmissions }: For
         if (confirm('Delete this submission?')) {
             // Optimistic update
             setSubmissions(prev => prev.filter(s => s.id !== subId))
-            // In a real app we'd call the server action here
-            // await deleteSubmission(subId)
+            // Server Action
+            await deleteSubmission(subId)
         }
     }
 
@@ -99,6 +117,18 @@ export function FormDetailsClient({ form, submissions: initialSubmissions }: For
                     <Code className="h-4 w-4" />
                     Setup
                 </button>
+                <button
+                    onClick={() => setActiveTab('settings')}
+                    className={cn(
+                        "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                        activeTab === 'settings'
+                            ? "bg-secondary text-foreground"
+                            : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                    )}
+                >
+                    <Settings className="h-4 w-4" />
+                    Settings
+                </button>
             </div>
 
             {/* Submissions Tab */}
@@ -138,8 +168,8 @@ export function FormDetailsClient({ form, submissions: initialSubmissions }: For
                                                     </span>
                                                 </div>
                                                 <p className="text-sm text-muted-foreground line-clamp-1">{message}</p>
-                                                <p className="text-xs text-muted-foreground mt-2" suppressHydrationWarning>
-                                                    {new Date(sub.created_at).toLocaleString()} via {sub.browser || 'Unknown'}
+                                                <p className="text-xs text-muted-foreground mt-2 font-mono" suppressHydrationWarning>
+                                                    {new Date(sub.created_at).toLocaleString()} • {sub.ip_address || 'No IP'} • {getBrowserName(sub.user_agent)}
                                                 </p>
                                             </div>
                                         </div>
@@ -282,6 +312,78 @@ export function FormDetailsClient({ form, submissions: initialSubmissions }: For
 })`}
                                 </pre>
                             </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            )}
+
+            {/* Settings Tab */}
+            {activeTab === 'settings' && (
+                <div className="max-w-xl mx-auto animate-fade-in">
+                    <Card className="glass-card">
+                        <CardContent className="p-6 space-y-6">
+                            <div className="flex items-center gap-3 border-b border-border/50 pb-4 mb-4">
+                                <Settings className="h-5 w-5 text-primary" />
+                                <h3 className="text-lg font-semibold">Form Settings</h3>
+                            </div>
+
+                            <form action={updateAction} className="space-y-6">
+                                <input type="hidden" name="id" value={form.id} />
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="name">Form Name</Label>
+                                    <Input
+                                        id="name"
+                                        name="name"
+                                        defaultValue={form.name}
+                                        required
+                                        className="bg-secondary/50 border-input"
+                                        placeholder="e.g. Contact Us"
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="notification_email">Notification Email</Label>
+                                    <Input
+                                        id="notification_email"
+                                        name="notification_email"
+                                        type="email"
+                                        defaultValue={form.notification_email}
+                                        required
+                                        className="bg-secondary/50 border-input"
+                                        placeholder="you@example.com"
+                                    />
+                                    <p className="text-xs text-muted-foreground">Submissions will be sent to this email.</p>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="allowed_domains">Allowed Domains</Label>
+                                    <Input
+                                        id="allowed_domains"
+                                        name="allowed_domains"
+                                        defaultValue={form.allowed_domains?.join(', ')}
+                                        className="bg-secondary/50 border-input"
+                                        placeholder="example.com, myblog.com"
+                                    />
+                                    <p className="text-xs text-muted-foreground">Comma-separated list of domains. Leave empty to allow all.</p>
+                                </div>
+
+                                {state?.error && (
+                                    <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md border border-destructive/20">
+                                        {state.error}
+                                    </div>
+                                )}
+
+                                {state?.success && (
+                                    <div className="bg-[hsl(142,76%,36%)]/10 text-[hsl(142,76%,36%)] text-sm p-3 rounded-md border border-[hsl(142,76%,36%)]/20">
+                                        {state.success}
+                                    </div>
+                                )}
+
+                                <div className="pt-4 flex justify-end">
+                                    <Button type="submit" isLoading={isUpdating}>Save Changes</Button>
+                                </div>
+                            </form>
                         </CardContent>
                     </Card>
                 </div>

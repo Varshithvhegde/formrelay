@@ -10,7 +10,7 @@ const supabaseAdmin = createClient(
 export async function POST(req: NextRequest) {
     // Handle CORS
     const origin = req.headers.get('origin')
-    const ip = req.headers.get('x-forwarded-for') || '127.0.0.1'
+    const ip = (req as any).ip || req.headers.get('x-forwarded-for') || '127.0.0.1'
 
     // Basic CORS headers for the response
     const headers = {

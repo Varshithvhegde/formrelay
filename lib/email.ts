@@ -20,7 +20,7 @@ export async function sendEmail({ to, replyTo, subject, text, html }: SendEmailP
                 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`
             },
             body: JSON.stringify({
-                from: 'FormRelay <onboarding@resend.dev>',
+                from: 'FormRelay <no-reply@varshithvhegde.in>',
                 to: [to],
                 reply_to: replyTo,
                 subject: subject,
