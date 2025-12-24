@@ -95,6 +95,26 @@ USING (
   )
 );
 
+CREATE POLICY "Users can update submissions for their forms" 
+ON public.submissions FOR UPDATE 
+USING (
+  EXISTS (
+    SELECT 1 FROM public.forms 
+    WHERE forms.id = submissions.form_id 
+    AND forms.user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Users can delete submissions for their forms" 
+ON public.submissions FOR DELETE 
+USING (
+  EXISTS (
+    SELECT 1 FROM public.forms 
+    WHERE forms.id = submissions.form_id 
+    AND forms.user_id = auth.uid()
+  )
+);
+
 -- IMPORTANT: Access Control Change for Next.js SaaS Architecture
 -- We intentionally DO NOT include a public INSERT policy for submissions here.
 -- The Next.js API Route Handler uses the Service Role Key to insert submissions.

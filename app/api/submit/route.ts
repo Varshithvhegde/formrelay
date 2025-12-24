@@ -10,7 +10,6 @@ const supabaseAdmin = createClient(
 export async function POST(req: NextRequest) {
     // Handle CORS
     const origin = req.headers.get('origin')
-    const ip = (req as any).ip || req.headers.get('x-forwarded-for') || '127.0.0.1'
 
     // Basic CORS headers for the response
     const headers = {
@@ -59,23 +58,25 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Validate Origin
+    const originToCheck = origin || req.headers.get('referer') || ''
     if (form.allowed_domains && form.allowed_domains.length > 0) {
-        if (!origin && !req.headers.get('referer')) {
-            // Direct API call without origin/referer might be blocked if strict, but allow for now or block?
-            // Block if domains are set.
-            return NextResponse.json({ error: 'Origin missing' }, { status: 403, headers })
-        }
-
-        const requestOrigin = origin || new URL(req.headers.get('referer')!).origin
-
-        const allowed = form.allowed_domains.some((d: string) =>
-            requestOrigin.includes(d) // Simple check
+        // Use user's logic for domain checking
+        const originHost = originToCheck ? new URL(originToCheck).hostname : ''
+        const isAllowed = form.allowed_domains.some((d: string) =>
+            originHost === d || originHost.endsWith('.' + d)
         )
 
-        if (!allowed) {
+        // Strict check: if allowed domains are set, we MUST have a matching origin
+        // If origin is missing, we block if we are in strict mode (implied by having allowed_domains set)
+        if (!isAllowed) {
             return NextResponse.json({ error: 'Origin not allowed' }, { status: 403, headers })
         }
     }
+
+    // Capture precise metadata
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0] ||
+        req.headers.get('x-real-ip') || 'unknown';
+    const userAgent = req.headers.get('user-agent') || ''
 
     // 3. Rate Limit (Simple: Max 5 per minute per IP for this form)
     // Note: timestamps in Supabase are usually ISO.
@@ -98,7 +99,7 @@ export async function POST(req: NextRequest) {
             form_id,
             payload,
             ip_address: ip,
-            user_agent: req.headers.get('user-agent'),
+            user_agent: userAgent,
             origin: origin || req.headers.get('referer'),
         })
 
