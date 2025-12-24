@@ -9,7 +9,6 @@ export function FormActions({ formId, isActive }: { formId: string, isActive: bo
 
     const handleToggle = () => {
         startTransition(async () => {
-            // We need to implement this action
             await toggleFormStatus(formId, !isActive)
         })
     }
@@ -25,14 +24,14 @@ export function FormActions({ formId, isActive }: { formId: string, isActive: bo
     return (
         <div className="flex space-x-2">
             <Button
-                variant={isActive ? "secondary" : "primary"}
+                variant={isActive ? "secondary" : "default"}
                 size="sm"
                 onClick={handleToggle}
                 isLoading={pending}
             >
                 {isActive ? 'Disable' : 'Enable'}
             </Button>
-            <Button variant="danger" size="sm" onClick={handleDelete} isLoading={pending}>
+            <Button variant="destructive" size="sm" onClick={handleDelete} isLoading={pending}>
                 Delete
             </Button>
         </div>
