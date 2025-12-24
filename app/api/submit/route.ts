@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { sendEmail } from '@/lib/email'
+import { sendEmail, generateEmailTemplate } from '@/lib/email'
 
 const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -121,7 +121,7 @@ export async function POST(req: NextRequest) {
             replyTo: replyTo as string | undefined,
             subject: `New Submission for ${form.name}`,
             text: `You have a new submission:\n\n${emailContent}\n\nTimestamp: ${new Date().toISOString()}`,
-            html: `<h2>New Submission for ${form.name}</h2><pre style="background:#f4f4f4;padding:10px;border-radius:5px;">${emailContent}</pre><p>Timestamp: ${new Date().toISOString()}</p>`
+            html: generateEmailTemplate(form.name, payload)
         })
     })()
 
