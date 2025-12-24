@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-sans), 'Inter', system-ui, sans-serif;
+  --font-mono: var(--font-mono), 'JetBrains Mono', monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
+/* 
+   Since Tailwind 4 uses color-mix by default for opacity if you use the OKLCH variables,
+   but we want to reuse the HSL variables from Vite.
+   We will define the CSS variables using specific HSL values.
+*/
+
+:root {
+  --background: hsl(222 47% 6%);
+  --foreground: hsl(210 40% 98%);
+
+  --card: hsl(222 47% 8%);
+  --card-foreground: hsl(210 40% 98%);
+
+  --popover: hsl(222 47% 10%);
+  --popover-foreground: hsl(210 40% 98%);
+
+  --primary: hsl(187 85% 53%);
+  --primary-foreground: hsl(222 47% 6%);
+
+  --secondary: hsl(222 30% 14%);
+  --secondary-foreground: hsl(210 40% 98%);
+
+  --muted: hsl(222 30% 18%);
+  --muted-foreground: hsl(215 20% 55%);
+
+  --accent: hsl(187 85% 53%);
+  --accent-foreground: hsl(222 47% 6%);
+
+  --destructive: hsl(0 72% 51%);
+  --destructive-foreground: hsl(210 40% 98%);
+
+  --border: hsl(222 30% 18%);
+  --input: hsl(222 30% 14%);
+  --ring: hsl(187 85% 53%);
+
+  --radius: 0.75rem;
+
+  /* Custom design tokens */
+  --gradient-primary: linear-gradient(135deg, hsl(187 85% 53%), hsl(199 89% 48%));
+  --gradient-surface: linear-gradient(180deg, hsl(222 47% 10%), hsl(222 47% 6%));
+
+  --shadow-glow: 0 0 40px hsl(187 85% 53% / 0.2);
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-card/80 backdrop-blur-xl border border-border/50;
+  }
+
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-primary);
+  }
+
+  .glow-effect {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .variant-hero {
+    background-image: var(--gradient-primary);
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+}
