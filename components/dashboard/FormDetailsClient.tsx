@@ -36,7 +36,7 @@ interface FormDetailsClientProps {
 
 type Tab = 'submissions' | 'setup' | 'settings'
 
-const initialState = {
+const initialState: { error?: string; success?: string } = {
     error: '',
     success: '',
 }
@@ -105,6 +105,11 @@ export function FormDetailsClient({
                     table: 'submissions',
                     filter: `form_id=eq.${form.id}`,
                 },
+                (payload) => {
+                    const newSubmission = payload.new as any
+                    setSubmissions((prev) => [newSubmission, ...prev])
+                    setCurrentTotalCount((prev) => prev + 1)
+                }
             )
             .on(
                 'postgres_changes',
@@ -120,7 +125,6 @@ export function FormDetailsClient({
                     ))
                 }
             )
-            .subscribe()
             .on(
                 'postgres_changes',
                 {
