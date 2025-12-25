@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/Button'
 import Link from 'next/link'
 import { Plus, ArrowRight, FileText } from 'lucide-react'
 
+import { CreateFormDialog } from '@/components/dashboard/CreateFormDialog'
+
 export default async function FormsPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -20,12 +22,7 @@ export default async function FormsPage() {
         <div className="space-y-8 max-w-7xl mx-auto">
             <div className="flex items-center justify-between">
                 <h1 className="text-3xl font-bold tracking-tight">My Forms</h1>
-                <Link href="/dashboard/forms/new">
-                    <Button>
-                        <Plus className="h-4 w-4 mr-2" />
-                        New Form
-                    </Button>
-                </Link>
+                <CreateFormDialog />
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

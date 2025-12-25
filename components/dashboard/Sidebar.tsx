@@ -8,6 +8,7 @@ import { Logo } from '@/components/Logo'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
 import { signOut } from '@/app/actions' // Server Action for signout
+import { CreateFormDialog } from '@/components/dashboard/CreateFormDialog'
 
 interface SidebarProps {
     userEmail?: string
@@ -16,7 +17,6 @@ interface SidebarProps {
 const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/dashboard/forms', label: 'Forms', icon: FileText },
-    { href: '/dashboard/forms/new', label: 'New Form', icon: Plus },
     // { href: '/settings', label: 'Settings', icon: Settings },
 ]
 
@@ -63,6 +63,12 @@ export function Sidebar({ userEmail }: SidebarProps) {
                                 </Link>
                             )
                         })}
+                        <CreateFormDialog trigger={
+                            <button className="flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground w-full transition-all">
+                                <Plus className="h-5 w-5" />
+                                New Form
+                            </button>
+                        } />
                         <form action={signOut} className="w-full">
                             <button
                                 type="submit"
@@ -104,6 +110,12 @@ export function Sidebar({ userEmail }: SidebarProps) {
                                 </Link>
                             )
                         })}
+                        <CreateFormDialog trigger={
+                            <button className="flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground w-full transition-all">
+                                <Plus className="h-5 w-5" />
+                                New Form
+                            </button>
+                        } />
                     </nav>
 
                     <div className="p-4 border-t border-border">

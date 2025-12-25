@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { FileText, TrendingUp, Inbox, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
+import { CreateFormDialog } from '@/components/dashboard/CreateFormDialog'
 
 export default async function DashboardPage() {
     const supabase = await createClient()
@@ -27,9 +28,9 @@ export default async function DashboardPage() {
                     <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
                     <p className="text-muted-foreground mt-1">Welcome back! Here's an overview of your forms.</p>
                 </div>
-                <Link href="/dashboard/forms/new">
+                <CreateFormDialog trigger={
                     <Button className="shadow-lg shadow-primary/25">New Form</Button>
-                </Link>
+                } />
             </div>
 
             {/* Stats */}
@@ -103,9 +104,7 @@ export default async function DashboardPage() {
                             <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4 opacity-50" />
                             <h3 className="text-lg font-medium">No forms yet</h3>
                             <p className="text-muted-foreground mb-6">Create your first form to get started</p>
-                            <Link href="/dashboard/forms/new">
-                                <Button>Create Form</Button>
-                            </Link>
+                            <CreateFormDialog />
                         </div>
                     )}
                 </div>
