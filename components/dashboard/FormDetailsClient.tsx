@@ -77,6 +77,7 @@ export function FormDetailsClient({
     const [isSearchPending, setIsSearchPending] = useState(false)
     const [isDeleteFormDialogOpen, setIsDeleteFormDialogOpen] = useState(false)
     const [isDeletingForm, setIsDeletingForm] = useState(false)
+    const [emailEnabled, setEmailEnabled] = useState(form.email_notifications_enabled)
 
     // Action state for settings form
     const [state, updateAction, isUpdating] = useActionState(updateForm, initialState)
@@ -609,11 +610,24 @@ export function FormDetailsClient({
                                         name="notification_email"
                                         type="email"
                                         defaultValue={form.notification_email}
-                                        required
                                         className="bg-secondary/50 border-input"
                                         placeholder="you@example.com"
                                     />
                                     <p className="text-xs text-muted-foreground">Submissions will be sent to this email.</p>
+                                </div>
+
+                                <div className="flex items-center justify-between rounded-lg border p-3 shadow-sm bg-secondary/20">
+                                    <div className="space-y-0.5">
+                                        <Label className="text-base">Email Notifications</Label>
+                                        <div className="text-xs text-muted-foreground">
+                                            Receive email for each submission
+                                        </div>
+                                    </div>
+                                    <Switch
+                                        checked={emailEnabled}
+                                        onCheckedChange={setEmailEnabled}
+                                    />
+                                    <input type="hidden" name="email_notifications_enabled" value={emailEnabled ? 'true' : 'false'} />
                                 </div>
 
                                 <div className="space-y-2">

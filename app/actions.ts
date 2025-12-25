@@ -50,12 +50,14 @@ export async function signOut() {
     redirect('/login')
 }
 
+// createForm update
 export async function createForm(prevState: any, formData: FormData) {
     const supabase = await createClient()
 
     const name = formData.get('name') as string
     const notification_email = formData.get('notification_email') as string
     const allowed_domains_raw = formData.get('allowed_domains') as string
+    const email_notifications_enabled = formData.get('email_notifications_enabled') as string
 
     const allowed_domains = allowed_domains_raw
         ? allowed_domains_raw.split(',').map((d) => d.trim()).filter((d) => d.length > 0)
@@ -74,6 +76,7 @@ export async function createForm(prevState: any, formData: FormData) {
         name,
         notification_email,
         allowed_domains,
+        email_notifications_enabled: email_notifications_enabled === 'true',
     })
 
     if (error) {
@@ -90,14 +93,11 @@ export async function updateForm(prevState: any, formData: FormData) {
     const name = formData.get('name') as string
     const notification_email = formData.get('notification_email') as string
     const allowed_domains_raw = formData.get('allowed_domains') as string
+    const email_notifications_enabled = formData.get('email_notifications_enabled') as string
 
     const allowed_domains = allowed_domains_raw
         ? allowed_domains_raw.split(',').map((d) => d.trim()).filter((d) => d.length > 0)
-        : null // null means don't update if not provided? No, logic should be: empty string -> empty array.
-
-    // If allowed_domains_raw is provided (even empty string), we update.
-    // However, formData.get returns string | null.
-    // If we want to support clearing it, we need to handle that.
+        : null
 
     // safe parsing
     const domainsToUpdate = allowed_domains_raw !== null
@@ -107,7 +107,8 @@ export async function updateForm(prevState: any, formData: FormData) {
     const { error } = await supabase.from('forms').update({
         name,
         notification_email,
-        allowed_domains: domainsToUpdate
+        allowed_domains: domainsToUpdate,
+        email_notifications_enabled: email_notifications_enabled === 'true'
     }).eq('id', id)
 
     if (error) {

@@ -107,27 +107,47 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Failed to store submission' }, { status: 500, headers })
     }
 
-    // 5. Send Email (Fire and forget-ish)
-    // We use a promise without await, but handling errors in catch.
-    // In Vercel, use `waitUntil` if available on the request or context.
-    // Next 15+ has unstable_after or context.waitUntil seems unavailable on NextRequest directly in App Router?
-    // We'll just run it. If lambda dies, email might fail. Acceptable for MVP.
-    const emailPromise = (async () => {
-        const emailContent = Object.entries(payload).map(([k, v]) => `${k}: ${v}`).join('\n')
-        // Try to find a reply-to email in the payload
-        const replyTo = payload.email || payload.Email || payload['reply-to'] || undefined
+    // 5. Send Email
+    // Only proceed if email notifications are enabled
+    if (form.email_notifications_enabled) {
+        let recipient = form.notification_email
 
-        await sendEmail({
-            to: form.notification_email,
-            replyTo: replyTo as string | undefined,
-            subject: `New Submission for ${form.name}`,
-            text: `You have a new submission:\n\n${emailContent}\n\nTimestamp: ${new Date().toISOString()}`,
-            html: generateEmailTemplate(form.name, payload)
-        })
-    })()
+        // Fallback to user email if notification_email is not set
+        if (!recipient) {
+            const { data: profile } = await supabaseAdmin
+                .from('profiles')
+                .select('email')
+                .eq('id', form.user_id)
+                .single()
+            recipient = profile?.email
+        }
 
-    // If using Next.js 15+, import { after } from 'next/server' and usage is `after(() => ...)`
-    // For now we just let it float.
+        if (recipient) {
+            const emailContent = Object.entries(payload).map(([k, v]) => `${k}: ${v}`).join('\n')
+            const replyTo = payload.email || payload.Email || payload['reply-to'] || undefined
+
+            const cleanTo = recipient.trim()
+            console.log(`[API] Sending email to: '${cleanTo}' (Source: ${form.notification_email ? 'Form Settings' : 'Account Email'})`)
+
+            // Await for verification (helps debugging)
+            const { error: emailError } = await sendEmail({
+                to: cleanTo,
+                replyTo: replyTo as string | undefined,
+                subject: `New Submission for ${form.name}`,
+                text: `You have a new submission:\n\n${emailContent}\n\nTimestamp: ${new Date().toISOString()}`,
+                html: generateEmailTemplate(form.name, payload)
+            })
+
+            if (emailError) {
+                console.error('Failed to send email:', emailError)
+                return NextResponse.json({
+                    success: true,
+                    message: 'Submission saved, but email failed',
+                    debug_error: emailError
+                }, { headers })
+            }
+        }
+    }
 
     return NextResponse.json({ success: true, message: 'Submission received' }, { headers })
 }
