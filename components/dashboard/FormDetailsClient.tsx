@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
 import { Switch } from '@/components/ui/Switch'
 import { Label } from '@/components/ui/Label'
-import { ArrowLeft, Check, Code, Copy, Eye, EyeOff, FileText, Inbox, Monitor, Settings, Trash2, X, Search, ChevronLeft, ChevronRight, Globe, MapPin, Clock } from 'lucide-react'
+import { ArrowLeft, Check, Code, Copy, Eye, EyeOff, FileText, Inbox, Monitor, Settings, Trash2, X, Search, ChevronLeft, ChevronRight, Globe, MapPin, Clock, Play, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { RefreshCw } from 'lucide-react'
 import NextLink from 'next/link'
 import { cn } from '@/lib/utils'
@@ -34,7 +34,7 @@ interface FormDetailsClientProps {
     initialSearchQuery: string
 }
 
-type Tab = 'submissions' | 'setup' | 'settings'
+type Tab = 'submissions' | 'setup' | 'settings' | 'playground'
 
 const initialState: { error?: string; success?: string } = {
     error: '',
@@ -87,6 +87,53 @@ export function FormDetailsClient({
     const supabase = createClient()
 
     const [currentTotalCount, setCurrentTotalCount] = useState(totalCount)
+
+    // Playground state
+    const [testName, setTestName] = useState('John Doe')
+    const [testEmail, setTestEmail] = useState('john@example.com')
+    const [testMessage, setTestMessage] = useState('This is a test message.')
+    const [isTesting, setIsTesting] = useState(false)
+    const [testResult, setTestResult] = useState<{ success: boolean; data?: any; error?: string; status?: number } | null>(null)
+
+    const handleTestSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setIsTesting(true)
+        setTestResult(null)
+
+        try {
+            const res = await fetch(endpointUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    form_id: form.id,
+                    name: testName,
+                    email: testEmail,
+                    message: testMessage,
+                })
+            })
+
+            const data = await res.json()
+            setTestResult({
+                success: res.ok,
+                status: res.status,
+                data: data,
+                error: !res.ok ? data.error || 'Request failed' : undefined
+            })
+
+            // Refresh submissions list slightly after to ensure realtime catches it or manual refresh works
+            if (res.ok) {
+                // optional: trigger a soft refetch if needed, but realtime usually handles it
+            }
+
+        } catch (err: any) {
+            setTestResult({
+                success: false,
+                error: err.message || 'Network error'
+            })
+        } finally {
+            setIsTesting(false)
+        }
+    }
 
     // Sync state with props when router.refresh() updates them
     useEffect(() => {
@@ -310,6 +357,18 @@ export function FormDetailsClient({
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={handleManualRefresh} disabled={isRefreshing}>
                     <RefreshCw className={cn("h-4 w-4", isRefreshing && "animate-spin")} />
                 </Button>
+                <button
+                    onClick={() => setActiveTab('playground')}
+                    className={cn(
+                        "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                        activeTab === 'playground'
+                            ? "bg-secondary text-foreground"
+                            : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                    )}
+                >
+                    <Play className="h-4 w-4" />
+                    Playground
+                </button>
                 <button
                     onClick={() => setActiveTab('setup')}
                     className={cn(
@@ -575,6 +634,132 @@ export function FormDetailsClient({
                             </div>
                         </CardContent>
                     </Card>
+                </div>
+            )}
+
+            {/* Playground Tab */}
+            {activeTab === 'playground' && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
+                    {/* Test Form */}
+                    <Card className="glass-card">
+                        <CardContent className="p-6 space-y-6">
+                            <div className="flex items-center gap-3 border-b border-border/50 pb-4">
+                                <Play className="h-5 w-5 text-primary" />
+                                <h3 className="text-lg font-semibold">Test Submission</h3>
+                            </div>
+
+                            <form onSubmit={handleTestSubmit} className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="testName">Name</Label>
+                                    <Input
+                                        id="testName"
+                                        value={testName}
+                                        onChange={(e) => setTestName(e.target.value)}
+                                        placeholder="John Doe"
+                                        className="bg-secondary/50"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="testEmail">Email</Label>
+                                    <Input
+                                        id="testEmail"
+                                        type="email"
+                                        value={testEmail}
+                                        onChange={(e) => setTestEmail(e.target.value)}
+                                        placeholder="john@example.com"
+                                        className="bg-secondary/50"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="testMessage">Message</Label>
+                                    <Input
+                                        id="testMessage"
+                                        value={testMessage}
+                                        onChange={(e) => setTestMessage(e.target.value)}
+                                        placeholder="Hello world!"
+                                        className="bg-secondary/50"
+                                    />
+                                </div>
+
+                                <div className="pt-4">
+                                    <Button type="submit" disabled={isTesting} className="w-full">
+                                        {isTesting ? (
+                                            <>
+                                                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                                                Sending...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Play className="mr-2 h-4 w-4" />
+                                                Send Test Request
+                                            </>
+                                        )}
+                                    </Button>
+                                </div>
+                            </form>
+                        </CardContent>
+                    </Card>
+
+                    {/* Response Viewer */}
+                    <div className="space-y-6">
+                        <Card className="glass-card h-full">
+                            <CardContent className="p-6 space-y-4 h-full flex flex-col">
+                                <div className="flex items-center justify-between border-b border-border/50 pb-4">
+                                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                                        <Monitor className="h-5 w-5 text-primary" />
+                                        Response
+                                    </h3>
+                                    {testResult && (
+                                        <span className={cn(
+                                            "text-xs font-mono px-2 py-1 rounded border",
+                                            testResult.success
+                                                ? "bg-green-500/10 text-green-500 border-green-500/20"
+                                                : "bg-red-500/10 text-red-500 border-red-500/20"
+                                        )}>
+                                            Status: {testResult.status || (testResult.success ? 200 : 500)}
+                                        </span>
+                                    )}
+                                </div>
+
+                                <div className="flex-1 bg-black/40 rounded-lg border border-border/50 p-4 font-mono text-sm overflow-auto custom-scrollbar relative min-h-[300px]">
+                                    {testResult ? (
+                                        <div className="space-y-2 animate-fade-in">
+                                            {testResult.success ? (
+                                                <div className="flex items-center gap-2 text-green-500 mb-4">
+                                                    <CheckCircle2 className="h-5 w-5" />
+                                                    <span className="font-semibold">Submission Successful!</span>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center gap-2 text-red-500 mb-4">
+                                                    <AlertCircle className="h-5 w-5" />
+                                                    <span className="font-semibold">Submission Failed</span>
+                                                </div>
+                                            )}
+
+                                            <div className="text-muted-foreground mb-1">Response Body:</div>
+                                            <pre className="text-foreground/90 whitespace-pre-wrap">
+                                                {JSON.stringify(testResult.data || { error: testResult.error }, null, 2)}
+                                            </pre>
+
+                                            {testResult.data?.debug_error && (
+                                                <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400">
+                                                    <strong>Debug Error:</strong>
+                                                    <pre className="mt-1 whitespace-pre-wrap text-xs">
+                                                        {JSON.stringify(testResult.data.debug_error, null, 2)}
+                                                    </pre>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div className="h-full flex flex-col items-center justify-center text-muted-foreground/50">
+                                            <Code className="h-12 w-12 mb-4 opacity-20" />
+                                            <p>Send a request to see the response here</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
             )}
 
