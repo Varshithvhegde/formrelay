@@ -2,8 +2,7 @@
 
 **FormRelay** is a powerful, self-hostable form backend solution built with **Next.js** and **Supabase**. It allows you to easily collect form submissions from your static websites, portfolios, or landing pages without needing to build your own server-side infrastructure.
 
-![Dashboard Preview](https://github.com/Varshithvhegde/formrelay/raw/main/public/dashboard-preview.png)
-*(Note: You might want to add a screenshot here)*
+<img width="1343" height="955" alt="image" src="https://github.com/user-attachments/assets/40ade9aa-27ce-4b94-bc54-543a878df75b" />
 
 ## 🚀 Features
 
