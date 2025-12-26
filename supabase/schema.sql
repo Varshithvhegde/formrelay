@@ -45,6 +45,7 @@ CREATE TABLE public.forms (
   is_active BOOLEAN NOT NULL DEFAULT true,
   allowed_domains TEXT[] DEFAULT '{}',
   email_notifications_enabled BOOLEAN NOT NULL DEFAULT true,
+  redirect_url TEXT,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );

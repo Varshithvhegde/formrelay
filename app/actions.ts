@@ -58,6 +58,7 @@ export async function createForm(prevState: any, formData: FormData) {
     const notification_email = formData.get('notification_email') as string
     const allowed_domains_raw = formData.get('allowed_domains') as string
     const email_notifications_enabled = formData.get('email_notifications_enabled') as string
+    const redirect_url = formData.get('redirect_url') as string
 
     const allowed_domains = allowed_domains_raw
         ? allowed_domains_raw.split(',').map((d) => d.trim()).filter((d) => d.length > 0)
@@ -77,6 +78,7 @@ export async function createForm(prevState: any, formData: FormData) {
         notification_email,
         allowed_domains,
         email_notifications_enabled: email_notifications_enabled === 'true',
+        redirect_url: redirect_url || null,
     })
 
     if (error) {
@@ -94,6 +96,7 @@ export async function updateForm(prevState: any, formData: FormData) {
     const notification_email = formData.get('notification_email') as string
     const allowed_domains_raw = formData.get('allowed_domains') as string
     const email_notifications_enabled = formData.get('email_notifications_enabled') as string
+    const redirect_url = formData.get('redirect_url') as string
 
     const allowed_domains = allowed_domains_raw
         ? allowed_domains_raw.split(',').map((d) => d.trim()).filter((d) => d.length > 0)
@@ -108,7 +111,8 @@ export async function updateForm(prevState: any, formData: FormData) {
         name,
         notification_email,
         allowed_domains: domainsToUpdate,
-        email_notifications_enabled: email_notifications_enabled === 'true'
+        email_notifications_enabled: email_notifications_enabled === 'true',
+        redirect_url: redirect_url || null,
     }).eq('id', id)
 
     if (error) {

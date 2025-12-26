@@ -789,6 +789,19 @@ export function FormDetailsClient({
                                 </div>
 
                                 <div className="space-y-2">
+                                    <Label htmlFor="redirect_url">Redirect URL (Optional)</Label>
+                                    <Input
+                                        id="redirect_url"
+                                        name="redirect_url"
+                                        type="url"
+                                        defaultValue={form.redirect_url}
+                                        className="bg-secondary/50 border-input"
+                                        placeholder="https://example.com/thank-you"
+                                    />
+                                    <p className="text-xs text-muted-foreground">Redirect users to this URL after submission (work only with HTML form submissions).</p>
+                                </div>
+
+                                <div className="space-y-2">
                                     <Label htmlFor="notification_email">Notification Email</Label>
                                     <Input
                                         id="notification_email"

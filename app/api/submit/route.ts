@@ -23,9 +23,11 @@ export async function POST(req: NextRequest) {
     }
 
     let body: any
+    let isJson = false
     try {
         const contentType = req.headers.get('content-type') || ''
         if (contentType.includes('application/json')) {
+            isJson = true
             body = await req.json()
         } else {
             // handle form-data or x-www-form-urlencoded
@@ -140,13 +142,20 @@ export async function POST(req: NextRequest) {
 
             if (emailError) {
                 console.error('Failed to send email:', emailError)
-                return NextResponse.json({
-                    success: true,
-                    message: 'Submission saved, but email failed',
-                    debug_error: emailError
-                }, { headers })
+                if (isJson) {
+                    return NextResponse.json({
+                        success: true,
+                        message: 'Submission saved, but email failed',
+                        debug_error: emailError
+                    }, { headers })
+                }
             }
         }
+    }
+
+    // 6. Return Response
+    if (!isJson && form.redirect_url) {
+        return NextResponse.redirect(form.redirect_url, { status: 303 })
     }
 
     return NextResponse.json({ success: true, message: 'Submission received' }, { headers })
