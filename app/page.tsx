@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { Logo } from '@/components/Logo'
-import { ArrowRight, Mail, Shield, Zap } from 'lucide-react'
+import { ArrowRight, Mail, Shield, Zap, Github } from 'lucide-react'
 
 export default function Home() {
   return (
@@ -31,7 +31,9 @@ export default function Home() {
               <Link href="/signup">
                 <Button size="xl" variant="hero">Start Free <ArrowRight className="h-5 w-5" /></Button>
               </Link>
-              <Button size="xl" variant="outline">View Demo</Button>
+              <Link href="https://github.com/Varshithvhegde/formrelay" target="_blank">
+                <Button size="xl" variant="outline"><Github className="h-5 w-5 mr-2" /> GitHub</Button>
+              </Link>
             </div>
           </div>
         </section>
