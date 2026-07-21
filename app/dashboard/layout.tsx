@@ -10,7 +10,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             <Sidebar userEmail={user?.email} />
 
             {/* Main content */}
-            <div className="lg:pl-64 pt-16 lg:pt-0 min-h-screen flex flex-col">
+            <div className="lg:pl-60 pt-14 lg:pt-0 min-h-screen flex flex-col">
                 <main className="flex-1 p-6 lg:p-8 animate-fade-in relative z-0">
                     {children}
                 </main>

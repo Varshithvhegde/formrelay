@@ -312,87 +312,66 @@ export function FormDetailsClient({
     return (
         <div className="space-y-6 max-w-5xl mx-auto">
             {/* Header */}
-            <div className="flex flex-col gap-4">
-                <NextLink href="/dashboard/forms" className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors w-fit">
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back
+            <div className="flex flex-col gap-3">
+                <NextLink href="/dashboard/forms" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit">
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    All forms
                 </NextLink>
-                <div className="flex items-center justify-between">
+                <div className="flex items-start justify-between gap-4">
                     <div>
-                        <div className="flex items-center gap-3">
-                            <h1 className="text-3xl font-bold tracking-tight text-foreground">{form.name}</h1>
+                        <div className="flex items-center gap-3 flex-wrap">
+                            <h1 className="text-2xl font-bold tracking-tight text-foreground">{form.name}</h1>
                             <span className={cn(
-                                "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border",
+                                "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border",
                                 form.is_active
-                                    ? "bg-[hsl(142,76%,36%)]/10 text-[hsl(142,76%,36%)] border-[hsl(142,76%,36%)]/20"
+                                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                                     : "bg-destructive/10 text-destructive border-destructive/20"
                             )}>
-                                <span className={cn("h-1.5 w-1.5 rounded-full", form.is_active ? "bg-[hsl(142,76%,36%)]" : "bg-destructive")} />
+                                <span className={cn("h-1.5 w-1.5 rounded-full", form.is_active ? "bg-emerald-400" : "bg-destructive")} />
                                 {form.is_active ? 'Active' : 'Inactive'}
                             </span>
                         </div>
-                        <p className="font-mono text-sm text-muted-foreground mt-2">{form.id}</p>
+                        <p className="font-mono text-xs text-muted-foreground/60 mt-1 select-all">{form.id}</p>
                     </div>
                 </div>
             </div>
 
             {/* Tabs */}
-            <div className="flex items-center gap-2 border-b border-border/50 pb-6">
-                <button
-                    onClick={() => setActiveTab('submissions')}
-                    className={cn(
-                        "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
-                        activeTab === 'submissions'
-                            ? "bg-secondary text-foreground"
-                            : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                    )}
-                >
-                    <Inbox className="h-4 w-4" />
-                    Submissions
-                    <span className="ml-1 text-xs bg-background/50 px-1.5 py-0.5 rounded-full border border-border/50">
-                        {currentTotalCount}
-                    </span>
-                </button>
-                <div className="h-4 w-px bg-border/50 mx-2" />
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={handleManualRefresh} disabled={isRefreshing}>
-                    <RefreshCw className={cn("h-4 w-4", isRefreshing && "animate-spin")} />
+            <div className="flex items-center gap-1 border-b border-border/50 pb-0 -mb-px overflow-x-auto">
+                {([
+                    { id: 'submissions' as Tab, label: 'Submissions', icon: Inbox, badge: currentTotalCount as number | undefined },
+                    { id: 'playground'  as Tab, label: 'Playground',  icon: Play,  badge: undefined },
+                    { id: 'setup'       as Tab, label: 'Setup',       icon: Code,  badge: undefined },
+                    { id: 'settings'    as Tab, label: 'Settings',    icon: Settings, badge: undefined },
+                ]).map((tab) => (
+                    <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={cn(
+                            "flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all whitespace-nowrap border-b-2 -mb-px",
+                            activeTab === tab.id
+                                ? "text-primary border-primary"
+                                : "text-muted-foreground border-transparent hover:text-foreground hover:border-border"
+                        )}
+                    >
+                        <tab.icon className="h-4 w-4" />
+                        {tab.label}
+                        {tab.badge !== undefined && (
+                            <span className={cn(
+                                "text-xs px-1.5 py-0.5 rounded-full border",
+                                activeTab === tab.id
+                                    ? "bg-primary/10 text-primary border-primary/20"
+                                    : "bg-secondary/60 text-muted-foreground border-border/50"
+                            )}>
+                                {tab.badge}
+                            </span>
+                        )}
+                    </button>
+                ))}
+                <div className="flex-1" />
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground mb-1 shrink-0" onClick={handleManualRefresh} disabled={isRefreshing}>
+                    <RefreshCw className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin")} />
                 </Button>
-                <button
-                    onClick={() => setActiveTab('playground')}
-                    className={cn(
-                        "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
-                        activeTab === 'playground'
-                            ? "bg-secondary text-foreground"
-                            : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                    )}
-                >
-                    <Play className="h-4 w-4" />
-                    Playground
-                </button>
-                <button
-                    onClick={() => setActiveTab('setup')}
-                    className={cn(
-                        "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
-                        activeTab === 'setup'
-                            ? "bg-secondary text-foreground"
-                            : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                    )}
-                >
-                    <Code className="h-4 w-4" />
-                    Setup
-                </button>
-                <button
-                    onClick={() => setActiveTab('settings')}
-                    className={cn(
-                        "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
-                        activeTab === 'settings'
-                            ? "bg-secondary text-foreground"
-                            : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                    )}
-                >
-                    <Settings className="h-4 w-4" />
-                    Settings
-                </button>
             </div>
 
             {/* Submissions Tab */}
@@ -410,17 +389,17 @@ export function FormDetailsClient({
                     </div>
 
                     {submissions.length === 0 ? (
-                        <div className="text-center py-20 bg-secondary/20 rounded-xl border border-dashed border-border/50">
-                            <div className="bg-secondary/50 h-16 w-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <Inbox className="h-8 w-8 text-muted-foreground" />
+                        <div className="text-center py-20 bg-secondary/10 rounded-2xl border border-dashed border-border/50">
+                            <div className="h-14 w-14 rounded-2xl border border-border/60 bg-card flex items-center justify-center mx-auto mb-4">
+                                <Inbox className="h-6 w-6 text-muted-foreground/50" />
                             </div>
-                            <h3 className="text-lg font-medium mb-1">No submissions yet</h3>
-                            <p className="text-muted-foreground max-w-sm mx-auto">
-                                Submissions from your form will appear here. Check the Setup tab to integrate your form.
+                            <h3 className="font-semibold mb-1">No submissions yet</h3>
+                            <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                                Submissions will appear here instantly. Check the <button onClick={() => setActiveTab('setup')} className="text-primary hover:underline">Setup tab</button> to integrate your form.
                             </p>
                         </div>
                     ) : (
-                        <div className={cn("space-y-3", isSearchPending && "opacity-50 transition-opacity")}>
+                        <div className={cn("space-y-2", isSearchPending && "opacity-50 transition-opacity")}>
                             {submissions.map((sub) => {
                                 const payload = typeof sub.payload === 'string' ? JSON.parse(sub.payload) : sub.payload
                                 const name = payload.name || payload.firstName || payload['First Name'] || 'Unknown'
@@ -432,31 +411,30 @@ export function FormDetailsClient({
                                         key={sub.id}
                                         onClick={() => handleSubmissionClick(sub)}
                                         className={cn(
-                                            "group relative flex items-start justify-between p-4 rounded-xl border transition-all cursor-pointer",
+                                            "group relative flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer will-gpu",
                                             sub.is_read
-                                                ? "bg-card/50 border-border hover:bg-secondary/50 hover:border-primary/30"
-                                                : "bg-primary/5 border-primary/20 hover:border-primary/40"
+                                                ? "bg-card/40 border-border/60 hover:bg-card/70 hover:border-primary/25"
+                                                : "bg-primary/5 border-primary/25 hover:border-primary/40"
                                         )}
                                     >
-                                        <div className="flex gap-4">
+                                        <div className="flex gap-3 min-w-0">
+                                            {/* Unread dot */}
                                             <div className={cn(
                                                 "mt-1 h-2 w-2 rounded-full shrink-0",
-                                                sub.is_read ? "bg-muted-foreground/30" : "bg-primary animate-pulse"
+                                                sub.is_read ? "bg-transparent" : "bg-primary animate-pulse"
                                             )} />
-                                            <div>
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <span className="font-medium text-foreground">{name}</span>
-                                                    <span className="text-sm text-muted-foreground flex items-center gap-1">
-                                                        <Inbox className="h-3 w-3" /> {email}
-                                                    </span>
+                                            <div className="min-w-0">
+                                                <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                                                    <span className={cn("font-semibold text-sm", !sub.is_read && "text-foreground")}>{name}</span>
+                                                    <span className="text-xs text-muted-foreground">{email}</span>
                                                 </div>
-                                                <p className="text-sm text-muted-foreground line-clamp-1">{message}</p>
-                                                <div className="flex items-center gap-3 mt-2">
-                                                    <p className="text-xs text-muted-foreground font-mono" suppressHydrationWarning>
+                                                <p className="text-sm text-muted-foreground/80 line-clamp-1 mb-1">{message}</p>
+                                                <div className="flex items-center gap-3">
+                                                    <p className="text-xs text-muted-foreground/60 font-mono" suppressHydrationWarning>
                                                         {new Date(sub.created_at).toLocaleString()}
                                                     </p>
                                                     {sub.origin && (
-                                                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                                        <p className="text-xs text-muted-foreground/60 flex items-center gap-1">
                                                             <Globe className="h-3 w-3" />
                                                             {tryGetHostname(sub.origin)}
                                                         </p>
@@ -464,22 +442,22 @@ export function FormDetailsClient({
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2">
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                className="h-8 w-8 hover:text-primary"
+                                                className="h-7 w-7 hover:text-primary"
                                                 onClick={(e) => toggleReadStatus(e, sub)}
                                             >
-                                                {sub.is_read ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                                {sub.is_read ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                                             </Button>
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                className="h-8 w-8 hover:text-destructive"
+                                                className="h-7 w-7 hover:text-destructive"
                                                 onClick={(e) => handleDeleteClick(e, sub.id)}
                                             >
-                                                <Trash2 className="h-4 w-4" />
+                                                <Trash2 className="h-3.5 w-3.5" />
                                             </Button>
                                         </div>
                                     </div>
@@ -524,88 +502,73 @@ export function FormDetailsClient({
 
             {/* Setup Tab */}
             {activeTab === 'setup' && (
-                <div className="space-y-6 animate-fade-in">
-                    <Card className="glass-card">
-                        <CardContent className="p-6 space-y-4">
-                            <h3 className="font-semibold text-lg flex items-center gap-2">
-                                <Code className="h-5 w-5 text-primary" />
-                                API Endpoint
-                            </h3>
-                            <div className="relative group">
-                                <div className="font-mono text-sm bg-secondary/50 border border-border rounded-lg p-4 break-all pr-12">
-                                    POST {endpointUrl}
-                                </div>
-                                <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    className="absolute right-2 top-2 h-8 w-8"
-                                    onClick={() => copyToClipboard(endpointUrl, 'endpoint')}
-                                >
-                                    {copiedStates['endpoint'] ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                                </Button>
+                <div className="space-y-5 animate-fade-in">
+                    {/* Endpoint */}
+                    <div className="rounded-2xl border border-border overflow-hidden bg-card/50">
+                        <div className="flex items-center justify-between px-5 py-3 border-b border-border/50 bg-secondary/30">
+                            <div className="flex items-center gap-2">
+                                <Code className="h-4 w-4 text-primary" />
+                                <span className="text-sm font-semibold">API Endpoint</span>
                             </div>
-                        </CardContent>
-                    </Card>
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-7 w-7"
+                                onClick={() => copyToClipboard(endpointUrl, 'endpoint')}
+                            >
+                                {copiedStates['endpoint'] ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                            </Button>
+                        </div>
+                        <div className="px-5 py-4 font-mono text-sm text-foreground/90 break-all">
+                            <span className="text-primary/70 mr-2">POST</span>{endpointUrl}
+                        </div>
+                    </div>
 
-                    <Card className="glass-card">
-                        <CardContent className="p-6 space-y-4">
-                            <div className="flex items-center justify-between">
-                                <h3 className="font-semibold text-lg flex items-center gap-2">
-                                    <FileText className="h-5 w-5 text-primary" />
-                                    HTML Form Example
-                                </h3>
-                                <div className="flex items-center gap-2 text-xs text-muted-foreground bg-secondary/50 px-2 py-1 rounded border border-border">
-                                    HTML
-                                </div>
+                    {/* HTML */}
+                    <div className="rounded-2xl border border-border overflow-hidden bg-card/50">
+                        <div className="flex items-center justify-between px-5 py-3 border-b border-border/50 bg-secondary/30">
+                            <div className="flex items-center gap-2">
+                                <FileText className="h-4 w-4 text-primary" />
+                                <span className="text-sm font-semibold">HTML Form</span>
+                                <span className="text-xs font-mono text-muted-foreground/60 bg-secondary px-1.5 py-0.5 rounded border border-border/50">html</span>
                             </div>
-
-                            <div className="relative group rounded-lg overflow-hidden border border-border">
-                                <div className="absolute right-2 top-2 z-10">
-                                    <Button
-                                        size="icon"
-                                        variant="ghost"
-                                        className="h-8 w-8 bg-background/50 backdrop-blur-sm border border-border/50 hover:bg-background"
-                                        onClick={() => copyToClipboard(`<form action="${endpointUrl}" method="POST">
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-7 w-7"
+                                onClick={() => copyToClipboard(`<form action="${endpointUrl}" method="POST">
   <input type="hidden" name="form_id" value="${form.id}" />
   <input type="email" name="email" placeholder="Email" required />
   <textarea name="message" placeholder="Message" required></textarea>
   <button type="submit">Send</button>
 </form>`, 'html')}
-                                    >
-                                        {copiedStates['html'] ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                                    </Button>
-                                </div>
-                                <pre className="text-sm font-mono p-4 bg-secondary/30 overflow-x-auto text-foreground/90">
-                                    {`<form action="${endpointUrl}" method="POST">
+                            >
+                                {copiedStates['html'] ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                            </Button>
+                        </div>
+                        <pre className="text-sm font-mono px-5 py-4 bg-secondary/10 overflow-x-auto text-foreground/90 leading-relaxed custom-scrollbar">
+                            {`<form action="${endpointUrl}" method="POST">
   <input type="hidden" name="form_id" value="${form.id}" />
   <input type="email" name="email" placeholder="Email" required />
   <textarea name="message" placeholder="Message" required></textarea>
   <button type="submit">Send</button>
 </form>`}
-                                </pre>
-                            </div>
-                        </CardContent>
-                    </Card>
+                        </pre>
+                    </div>
 
-                    <Card className="glass-card">
-                        <CardContent className="p-6 space-y-4">
-                            <div className="flex items-center justify-between">
-                                <h3 className="font-semibold text-lg flex items-center gap-2">
-                                    <Code className="h-5 w-5 text-primary" />
-                                    JavaScript Fetch Example
-                                </h3>
-                                <div className="flex items-center gap-2 text-xs text-muted-foreground bg-secondary/50 px-2 py-1 rounded border border-border">
-                                    JAVASCRIPT
-                                </div>
+                    {/* JS */}
+                    <div className="rounded-2xl border border-border overflow-hidden bg-card/50">
+                        <div className="flex items-center justify-between px-5 py-3 border-b border-border/50 bg-secondary/30">
+                            <div className="flex items-center gap-2">
+                                <Code className="h-4 w-4 text-primary" />
+                                <span className="text-sm font-semibold">JavaScript Fetch</span>
+                                <span className="text-xs font-mono text-muted-foreground/60 bg-secondary px-1.5 py-0.5 rounded border border-border/50">js</span>
                             </div>
-
-                            <div className="relative group rounded-lg overflow-hidden border border-border">
-                                <div className="absolute right-2 top-2 z-10">
-                                    <Button
-                                        size="icon"
-                                        variant="ghost"
-                                        className="h-8 w-8 bg-background/50 backdrop-blur-sm border border-border/50 hover:bg-background"
-                                        onClick={() => copyToClipboard(`fetch("${endpointUrl}", {
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-7 w-7"
+                                onClick={() => copyToClipboard(`fetch("${endpointUrl}", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
@@ -615,12 +578,12 @@ export function FormDetailsClient({
     message: "Hello!"
   })
 })`, 'js')}
-                                    >
-                                        {copiedStates['js'] ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                                    </Button>
-                                </div>
-                                <pre className="text-sm font-mono p-4 bg-secondary/30 overflow-x-auto text-foreground/90">
-                                    {`fetch("${endpointUrl}", {
+                            >
+                                {copiedStates['js'] ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                            </Button>
+                        </div>
+                        <pre className="text-sm font-mono px-5 py-4 bg-secondary/10 overflow-x-auto text-foreground/90 leading-relaxed custom-scrollbar">
+                            {`fetch("${endpointUrl}", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
@@ -630,10 +593,8 @@ export function FormDetailsClient({
     message: "Hello!"
   })
 })`}
-                                </pre>
-                            </div>
-                        </CardContent>
-                    </Card>
+                        </pre>
+                    </div>
                 </div>
             )}
 
@@ -906,74 +867,62 @@ export function FormDetailsClient({
 
             {/* Submission Details Modal */}
             {selectedSubmission && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
                     <div
-                        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
+                        className="absolute inset-0 bg-black/70 backdrop-blur-sm animate-fade-in"
                         onClick={() => setSelectedSubmission(null)}
                     />
-                    <div className="relative w-full max-w-2xl bg-[#0f1117] border border-border rounded-xl shadow-2xl animate-scale-in overflow-hidden flex flex-col max-h-[90vh]">
+                    <div className="relative w-full sm:max-w-xl bg-card border border-border sm:rounded-2xl shadow-2xl animate-scale-in overflow-hidden flex flex-col max-h-[92vh]">
                         {/* Modal Header */}
-                        <div className="flex items-center justify-between p-6 border-b border-border/50">
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-border/50 shrink-0">
                             <div className="flex items-center gap-3">
-                                <h2 className="text-xl font-semibold">Submission Details</h2>
-                                <span className="px-2 py-0.5 text-xs font-medium bg-secondary text-muted-foreground rounded-full border border-border">
+                                <h2 className="text-base font-semibold">Submission</h2>
+                                <span className="px-2 py-0.5 text-xs font-medium bg-emerald-500/10 text-emerald-400 rounded-full border border-emerald-500/20">
                                     Read
                                 </span>
                             </div>
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8 hover:bg-secondary rounded-full"
+                                className="h-7 w-7 rounded-lg"
                                 onClick={() => setSelectedSubmission(null)}
                             >
-                                <X className="h-5 w-5" />
+                                <X className="h-4 w-4" />
                             </Button>
                         </div>
 
                         {/* Modal Content */}
-                        <div className="p-6 overflow-y-auto custom-scrollbar">
-                            {/* Metadata Card */}
-                            <div className="bg-secondary/20 rounded-xl p-4 border border-border/50 mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase tracking-wider mb-1">
-                                        <Clock className="h-3 w-3" /> Submitted
+                        <div className="p-6 overflow-y-auto custom-scrollbar space-y-6">
+                            {/* Metadata */}
+                            <div className="grid grid-cols-2 gap-3">
+                                {[
+                                    { icon: Clock,   label: 'Submitted', value: new Date(selectedSubmission.created_at).toLocaleString(), mono: true, suppress: true },
+                                    { icon: Globe,   label: 'Origin',    value: selectedSubmission.origin || 'Direct API', mono: true },
+                                    { icon: MapPin,  label: 'IP',        value: selectedSubmission.ip_address || 'Unknown', mono: true },
+                                    { icon: Monitor, label: 'Browser',   value: getBrowserName(selectedSubmission.user_agent), mono: false },
+                                ].map(({ icon: Icon, label, value, mono, suppress }) => (
+                                    <div key={label} className="p-3 rounded-xl bg-secondary/30 border border-border/40">
+                                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1.5">
+                                            <Icon className="h-3 w-3" /> {label}
+                                        </div>
+                                        <p
+                                            className={cn("text-sm truncate", mono ? "font-mono" : "")}
+                                            suppressHydrationWarning={suppress}
+                                            title={value}
+                                        >
+                                            {value}
+                                        </p>
                                     </div>
-                                    <p className="font-mono text-sm" suppressHydrationWarning>{new Date(selectedSubmission.created_at).toLocaleString()}</p>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase tracking-wider mb-1">
-                                        <Globe className="h-3 w-3" /> Origin
-                                    </div>
-                                    <p className="font-mono text-sm truncate" title={selectedSubmission.origin}>
-                                        {selectedSubmission.origin || 'Direct API'}
-                                    </p>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase tracking-wider mb-1">
-                                        <MapPin className="h-3 w-3" /> IP Address
-                                    </div>
-                                    <p className="font-mono text-sm">{selectedSubmission.ip_address || 'Unknown'}</p>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase tracking-wider mb-1">
-                                        <Monitor className="h-3 w-3" /> Browser
-                                    </div>
-                                    <p className="font-mono text-sm text-muted-foreground truncate" title={selectedSubmission.user_agent}>
-                                        {getBrowserName(selectedSubmission.user_agent)}
-                                    </p>
-                                </div>
+                                ))}
                             </div>
 
                             {/* Payload Fields */}
-                            <div className="space-y-6">
-                                <h3 className="text-lg font-semibold">Form Data</h3>
+                            <div className="space-y-4">
+                                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Form Data</h3>
                                 {Object.entries(selectedSubmission.payload || {}).map(([key, value]) => (
-                                    <div key={key} className="space-y-2">
-                                        <Label className="text-muted-foreground capitalize">{key.replace(/_/g, ' ')}</Label>
-                                        <div className="w-full rounded-lg border border-border bg-secondary/30 px-4 py-3 text-sm text-foreground font-mono whitespace-pre-wrap break-words">
+                                    <div key={key}>
+                                        <Label className="text-xs text-muted-foreground mb-1.5 block capitalize">{key.replace(/_/g, ' ')}</Label>
+                                        <div className="w-full rounded-xl border border-border/60 bg-secondary/20 px-4 py-3 text-sm font-mono whitespace-pre-wrap break-words text-foreground/90">
                                             {typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value)}
                                         </div>
                                     </div>

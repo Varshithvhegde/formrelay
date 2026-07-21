@@ -29,12 +29,6 @@
   --radius-sm: calc(var(--radius) - 4px);
 }
 
-/* 
-   Since Tailwind 4 uses color-mix by default for opacity if you use the OKLCH variables,
-   but we want to reuse the HSL variables from Vite.
-   We will define the CSS variables using specific HSL values.
-*/
-
 :root {
   --background: hsl(222 47% 6%);
   --foreground: hsl(210 40% 98%);
@@ -66,16 +60,26 @@
 
   --radius: 0.75rem;
 
-  /* Custom design tokens */
   --gradient-primary: linear-gradient(135deg, hsl(187 85% 53%), hsl(199 89% 48%));
   --gradient-surface: linear-gradient(180deg, hsl(222 47% 10%), hsl(222 47% 6%));
-
   --shadow-glow: 0 0 40px hsl(187 85% 53% / 0.2);
+  --shadow-glow-sm: 0 0 20px hsl(187 85% 53% / 0.15);
 }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: hsl(222 47% 6%); }
+::-webkit-scrollbar-thumb { background: hsl(222 30% 22%); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(222 30% 30%); }
+
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: hsl(222 30% 24%); border-radius: 99px; }
 
 @layer components {
   .glass-card {
     @apply bg-card/80 backdrop-blur-xl border border-border/50;
+    contain: layout style;
   }
 
   .gradient-text {
@@ -90,20 +94,111 @@
   .variant-hero {
     background-image: var(--gradient-primary);
   }
+
+  /* Dot grid background */
+  .dot-grid {
+    background-image: radial-gradient(circle, hsl(215 30% 40% / 0.35) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
+  /* Subtle grid lines */
+  .grid-lines {
+    background-image:
+      linear-gradient(hsl(215 30% 40% / 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(215 30% 40% / 0.06) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+
+  .nav-item-active {
+    @apply bg-primary/10 text-primary border-l-2 border-primary;
+    border-left-color: hsl(187 85% 53%);
+  }
 }
 
 @layer utilities {
+  /* Fade in */
   .animate-fade-in {
-    animation: fadeIn 0.5s ease-out forwards;
+    animation: fadeIn 0.4s ease-out forwards;
+  }
+
+  /* Slide up */
+  .animate-slide-up {
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* Scale in (modal entrance) */
+  .animate-scale-in {
+    animation: scaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* Float (gentle bob) */
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+  }
+
+  /* Signal dot traveling the pipeline */
+  .animate-relay {
+    animation: relayTravel 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    will-change: transform, opacity;
+  }
+
+  .animate-relay-delayed {
+    animation: relayTravel 2.4s cubic-bezier(0.4, 0, 0.2, 1) 1.2s infinite;
+    will-change: transform, opacity;
+  }
+
+  /* Gradient border shimmer */
+  .animate-shimmer {
+    animation: shimmer 2s linear infinite;
+    background-size: 200% 100%;
+  }
+
+  /* Pulse glow */
+  .animate-glow-pulse {
+    animation: glowPulse 2.5s ease-in-out infinite;
+  }
+
+  /* GPU-promote animated cards */
+  .will-gpu {
+    will-change: transform;
+    transform: translateZ(0);
   }
 
   @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
 
-    to {
-      opacity: 1;
-    }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.95) translateY(4px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50%       { transform: translateY(-6px); }
+  }
+
+  @keyframes relayTravel {
+    0%   { transform: translateX(0);     opacity: 0; }
+    8%   { opacity: 1; }
+    45%  { transform: translateX(160px); opacity: 1; }
+    55%  { opacity: 0; }
+    100% { transform: translateX(160px); opacity: 0; }
+  }
+
+  @keyframes shimmer {
+    from { background-position: 200% center; }
+    to   { background-position: -200% center; }
+  }
+
+  @keyframes glowPulse {
+    0%, 100% { box-shadow: 0 0 12px hsl(187 85% 53% / 0.25); }
+    50%       { box-shadow: 0 0 28px hsl(187 85% 53% / 0.55); }
   }
 }
